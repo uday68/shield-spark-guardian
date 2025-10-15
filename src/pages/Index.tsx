@@ -2,13 +2,16 @@ import { useState } from "react";
 import { Shield, Activity, Zap, Globe, FileCheck, Lock } from "lucide-react";
 import { StatusCard } from "@/components/dashboard/StatusCard";
 import { ProtectionModule } from "@/components/dashboard/ProtectionModule";
-import { ScanButton } from "@/components/dashboard/ScanButton";
 import { RecentScans } from "@/components/dashboard/RecentScans";
+import { ThreatScanner } from "@/components/scan/ThreatScanner";
+import { QuarantineManager } from "@/components/quarantine/QuarantineManager";
+import { DetectedThreat } from "@/lib/threatDetection";
 
 const Index = () => {
   const [realtimeProtection, setRealtimeProtection] = useState(true);
   const [firewall, setFirewall] = useState(true);
   const [webProtection, setWebProtection] = useState(true);
+  const [detectedThreats, setDetectedThreats] = useState<DetectedThreat[]>([]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,36 +68,45 @@ const Index = () => {
           />
         </div>
 
-        {/* Scan Section and Protection Modules */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          <div className="lg:col-span-2">
-            <ScanButton />
-          </div>
-          <div className="space-y-4">
-            <h3 className="text-xl font-bold mb-4">Protection Status</h3>
-            <ProtectionModule
-              title="Real-time Protection"
-              description="Monitors and blocks threats in real-time"
-              icon={Shield}
-              enabled={realtimeProtection}
-              onToggle={setRealtimeProtection}
-            />
-            <ProtectionModule
-              title="Firewall"
-              description="Blocks unauthorized network access"
-              icon={Zap}
-              enabled={firewall}
-              onToggle={setFirewall}
-            />
-            <ProtectionModule
-              title="Web Protection"
-              description="Protects against malicious websites"
-              icon={Globe}
-              enabled={webProtection}
-              onToggle={setWebProtection}
-            />
-          </div>
+        {/* Threat Scanner */}
+        <div className="mb-8">
+          <ThreatScanner onThreatsDetected={setDetectedThreats} />
         </div>
+
+        {/* Protection Modules */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <ProtectionModule
+            title="Real-time Protection"
+            description="Monitors and blocks threats in real-time"
+            icon={Shield}
+            enabled={realtimeProtection}
+            onToggle={setRealtimeProtection}
+          />
+          <ProtectionModule
+            title="Firewall"
+            description="Blocks unauthorized network access"
+            icon={Zap}
+            enabled={firewall}
+            onToggle={setFirewall}
+          />
+          <ProtectionModule
+            title="Web Protection"
+            description="Protects against malicious websites"
+            icon={Globe}
+            enabled={webProtection}
+            onToggle={setWebProtection}
+          />
+        </div>
+
+        {/* Quarantine Manager */}
+        {detectedThreats.length > 0 && (
+          <div className="mb-8">
+            <QuarantineManager 
+              threats={detectedThreats} 
+              onThreatsUpdate={setDetectedThreats}
+            />
+          </div>
+        )}
 
         {/* Recent Scans */}
         <RecentScans />
