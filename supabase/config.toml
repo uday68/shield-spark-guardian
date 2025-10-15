@@ -1,1 +1,4 @@
 project_id = "jcnjdzaldfdhxskmdhdb"
+
+[functions.perform-scan]
+verify_jwt = false

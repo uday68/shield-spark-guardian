@@ -7,9 +7,10 @@ interface StatusCardProps {
   icon: LucideIcon;
   trend?: "up" | "down" | "neutral";
   variant?: "default" | "success" | "warning" | "danger";
+  loading?: boolean;
 }
 
-export const StatusCard = ({ title, value, icon: Icon, variant = "default" }: StatusCardProps) => {
+export const StatusCard = ({ title, value, icon: Icon, variant = "default", loading = false }: StatusCardProps) => {
   const variantStyles = {
     default: "border-border",
     success: "border-success/30 bg-success/5",
@@ -29,7 +30,9 @@ export const StatusCard = ({ title, value, icon: Icon, variant = "default" }: St
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-muted-foreground mb-1">{title}</p>
-          <p className="text-3xl font-bold">{value}</p>
+          <p className="text-3xl font-bold">
+            {loading ? "..." : value}
+          </p>
         </div>
         <div className={`p-3 rounded-lg bg-card ${iconStyles[variant]}`}>
           <Icon size={28} />

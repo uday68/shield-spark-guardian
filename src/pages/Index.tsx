@@ -5,13 +5,16 @@ import { ProtectionModule } from "@/components/dashboard/ProtectionModule";
 import { RecentScans } from "@/components/dashboard/RecentScans";
 import { ThreatScanner } from "@/components/scan/ThreatScanner";
 import { QuarantineManager } from "@/components/quarantine/QuarantineManager";
-import { DetectedThreat } from "@/lib/threatDetection";
+import { useSystemStats } from "@/hooks/useSystemStats";
+import { useRealtimeThreats } from "@/hooks/useRealtimeThreats";
 
 const Index = () => {
   const [realtimeProtection, setRealtimeProtection] = useState(true);
   const [firewall, setFirewall] = useState(true);
   const [webProtection, setWebProtection] = useState(true);
-  const [detectedThreats, setDetectedThreats] = useState<DetectedThreat[]>([]);
+  
+  const { stats, loading: statsLoading } = useSystemStats();
+  const { threats } = useRealtimeThreats();
 
   return (
     <div className="min-h-screen bg-background">
@@ -44,33 +47,37 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatusCard
             title="Threats Blocked"
-            value="1,247"
+            value={stats?.threats_blocked || 0}
             icon={Shield}
             variant="success"
+            loading={statsLoading}
           />
           <StatusCard
             title="Files Scanned"
-            value="45.2K"
+            value={stats?.files_scanned.toLocaleString() || "0"}
             icon={FileCheck}
             variant="default"
+            loading={statsLoading}
           />
           <StatusCard
             title="System Health"
-            value="98%"
+            value={`${stats?.system_health || 100}%`}
             icon={Activity}
             variant="success"
+            loading={statsLoading}
           />
           <StatusCard
             title="Security Score"
-            value="A+"
+            value={stats?.security_score || "A+"}
             icon={Lock}
             variant="success"
+            loading={statsLoading}
           />
         </div>
 
         {/* Threat Scanner */}
         <div className="mb-8">
-          <ThreatScanner onThreatsDetected={setDetectedThreats} />
+          <ThreatScanner />
         </div>
 
         {/* Protection Modules */}
@@ -99,12 +106,9 @@ const Index = () => {
         </div>
 
         {/* Quarantine Manager */}
-        {detectedThreats.length > 0 && (
+        {threats.length > 0 && (
           <div className="mb-8">
-            <QuarantineManager 
-              threats={detectedThreats} 
-              onThreatsUpdate={setDetectedThreats}
-            />
+            <QuarantineManager />
           </div>
         )}
 

@@ -14,7 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      scans: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_file: string | null
+          files_scanned: number | null
+          id: string
+          progress: number | null
+          scan_type: string
+          started_at: string
+          status: string
+          threats_found: number | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_file?: string | null
+          files_scanned?: number | null
+          id?: string
+          progress?: number | null
+          scan_type: string
+          started_at?: string
+          status: string
+          threats_found?: number | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_file?: string | null
+          files_scanned?: number | null
+          id?: string
+          progress?: number | null
+          scan_type?: string
+          started_at?: string
+          status?: string
+          threats_found?: number | null
+        }
+        Relationships: []
+      }
+      system_stats: {
+        Row: {
+          created_at: string
+          files_scanned: number | null
+          id: string
+          last_scan_at: string | null
+          security_score: string | null
+          system_health: number | null
+          threats_blocked: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          files_scanned?: number | null
+          id?: string
+          last_scan_at?: string | null
+          security_score?: string | null
+          system_health?: number | null
+          threats_blocked?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          files_scanned?: number | null
+          id?: string
+          last_scan_at?: string | null
+          security_score?: string | null
+          system_health?: number | null
+          threats_blocked?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      threats: {
+        Row: {
+          created_at: string
+          detected_at: string
+          file_path: string
+          id: string
+          name: string
+          scan_id: string | null
+          severity: string
+          status: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          detected_at?: string
+          file_path: string
+          id?: string
+          name: string
+          scan_id?: string | null
+          severity: string
+          status?: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          detected_at?: string
+          file_path?: string
+          id?: string
+          name?: string
+          scan_id?: string | null
+          severity?: string
+          status?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "threats_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

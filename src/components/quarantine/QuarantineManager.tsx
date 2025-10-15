@@ -1,39 +1,34 @@
-import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Archive, AlertTriangle, CheckCircle } from "lucide-react";
-import { DetectedThreat } from "@/lib/threatDetection";
+import { Trash2, Archive, AlertTriangle, CheckCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useRealtimeThreats } from "@/hooks/useRealtimeThreats";
+import { formatDistanceToNow } from "date-fns";
 
-interface QuarantineManagerProps {
-  threats: DetectedThreat[];
-  onThreatsUpdate?: (threats: DetectedThreat[]) => void;
-}
+export const QuarantineManager = () => {
+  const { threats, loading, updateThreatStatus } = useRealtimeThreats();
 
-export const QuarantineManager = ({ threats, onThreatsUpdate }: QuarantineManagerProps) => {
-  const [managedThreats, setManagedThreats] = useState<DetectedThreat[]>(threats);
-
-  const handleQuarantine = (threatId: string) => {
-    const updated = managedThreats.map((t) =>
-      t.id === threatId ? { ...t, status: "quarantined" as const } : t
-    );
-    setManagedThreats(updated);
-    onThreatsUpdate?.(updated);
-    toast.success("Threat quarantined", {
-      description: "The threat has been isolated safely",
-    });
+  const handleQuarantine = async (threatId: string) => {
+    try {
+      await updateThreatStatus(threatId, "quarantined");
+      toast.success("Threat quarantined", {
+        description: "The threat has been isolated safely",
+      });
+    } catch (error) {
+      toast.error("Failed to quarantine threat");
+    }
   };
 
-  const handleRemove = (threatId: string) => {
-    const updated = managedThreats.map((t) =>
-      t.id === threatId ? { ...t, status: "removed" as const } : t
-    );
-    setManagedThreats(updated);
-    onThreatsUpdate?.(updated);
-    toast.success("Threat removed", {
-      description: "The threat has been permanently deleted",
-    });
+  const handleRemove = async (threatId: string) => {
+    try {
+      await updateThreatStatus(threatId, "removed");
+      toast.success("Threat removed", {
+        description: "The threat has been permanently deleted",
+      });
+    } catch (error) {
+      toast.error("Failed to remove threat");
+    }
   };
 
   const getSeverityColor = (severity: string) => {
@@ -57,7 +52,17 @@ export const QuarantineManager = ({ threats, onThreatsUpdate }: QuarantineManage
     }
   };
 
-  if (managedThreats.length === 0) {
+  if (loading) {
+    return (
+      <Card className="p-6 shadow-card border-border">
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </Card>
+    );
+  }
+
+  if (threats.length === 0) {
     return (
       <Card className="p-8 shadow-card border-border text-center">
         <CheckCircle className="w-12 h-12 text-success mx-auto mb-4" />
@@ -72,12 +77,12 @@ export const QuarantineManager = ({ threats, onThreatsUpdate }: QuarantineManage
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-bold">Threat Management</h3>
         <Badge variant="destructive" className="text-sm">
-          {managedThreats.filter((t) => t.status === "detected").length} Active
+          {threats.filter((t) => t.status === "detected").length} Active
         </Badge>
       </div>
 
       <div className="space-y-3">
-        {managedThreats.map((threat) => (
+        {threats.map((threat) => (
           <div
             key={threat.id}
             className="p-4 rounded-lg bg-secondary border border-border hover:border-primary/30 transition-colors animate-fade-in"
@@ -95,10 +100,10 @@ export const QuarantineManager = ({ threats, onThreatsUpdate }: QuarantineManage
                   <strong>Type:</strong> {threat.type}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  <strong>Path:</strong> {threat.filePath}
+                  <strong>Path:</strong> {threat.file_path}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  <strong>Detected:</strong> {threat.detectedAt.toLocaleString()}
+                  <strong>Detected:</strong> {formatDistanceToNow(new Date(threat.detected_at), { addSuffix: true })}
                 </p>
               </div>
 
